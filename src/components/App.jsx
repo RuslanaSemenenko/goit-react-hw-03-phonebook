@@ -5,6 +5,17 @@ import Filter from './Filter/Filter';
 import ContactForm from './ContactForm/ContactForm';
 
 export default class App extends Component {
+  componentDidMount() {
+    const storedContacts = localStorage.getItem('contacts');
+    if (storedContacts) {
+      this.setState({ contacts: JSON.parse(storedContacts) });
+    }
+  }
+
+  componentWillUnmount() {
+    localStorage.setItem('contacts', JSON.stringify(this.state.contacts));
+  }
+
   state = {
     contacts: [
       { id: 'id-1', name: 'Rosie Simpson', number: '459-12-56' },
