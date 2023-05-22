@@ -1,3 +1,5 @@
+//
+
 import React, { Component } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import ContactList from './ContactList/ContactList';
@@ -12,8 +14,9 @@ export default class App extends Component {
     }
   }
 
-  componentWillUnmount() {
-    localStorage.setItem('contacts', JSON.stringify(this.state.contacts));
+  componentDidUpdate() {
+    const { contacts } = this.state;
+    localStorage.setItem('contacts', JSON.stringify(contacts));
   }
 
   state = {
@@ -26,24 +29,31 @@ export default class App extends Component {
     filter: '',
   };
 
-  addContact = task => {
+  addContact = contact => {
+    const { name, number } = contact;
+
     const searchSameName = this.state.contacts
       .map(cont => cont.name)
-      .includes(task.name);
+      .includes(name);
 
     if (searchSameName) {
-      alert(`${task.name} is already in contacts`);
-    } else if (task.name.length === 0) {
+      alert(`${name} is already in contacts`);
+    } else if (name.length === 0 || number.length === 0) {
       alert('Fields must be filled!');
     } else {
-      const contact = {
-        ...task,
+      const newContact = {
+        ...contact,
         id: uuidv4(),
       };
 
-      this.setState(prevState => ({
-        contacts: [...prevState.contacts, contact],
-      }));
+      this.setState(
+        prevState => ({
+          contacts: [...prevState.contacts, newContact],
+        }),
+        () => {
+          localStorage.setItem('contacts', JSON.stringify(this.state.contacts));
+        }
+      );
     }
   };
 
@@ -54,22 +64,24 @@ export default class App extends Component {
   getVisibleContacts = () => {
     const { contacts, filter } = this.state;
 
-    return contacts.filter(contacts =>
-      contacts.name.toLowerCase().includes(filter.toLowerCase())
+    return contacts.filter(contact =>
+      contact.name.toLowerCase().includes(filter.toLowerCase())
     );
   };
 
   removeContact = contactId => {
-    this.setState(prevState => {
-      return {
+    this.setState(
+      prevState => ({
         contacts: prevState.contacts.filter(({ id }) => id !== contactId),
-      };
-    });
+      }),
+      () => {
+        localStorage.setItem('contacts', JSON.stringify(this.state.contacts));
+      }
+    );
   };
 
   render() {
     const { filter } = this.state;
-
     const visibleContacts = this.getVisibleContacts();
 
     return (
