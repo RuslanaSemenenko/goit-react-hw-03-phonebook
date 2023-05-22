@@ -8,6 +8,18 @@ export default class ContactForm extends Component {
     number: '',
   };
 
+  componentDidMount() {
+    const storedContacts = localStorage.getItem('contacts');
+    if (storedContacts) {
+      this.setState({ contacts: JSON.parse(storedContacts) });
+    }
+  }
+
+  componentDidUpdate() {
+    const { contacts } = this.state;
+    localStorage.setItem('contacts', JSON.stringify(contacts));
+  }
+
   handleChange = e => {
     const { name, value } = e.target;
     this.setState({
